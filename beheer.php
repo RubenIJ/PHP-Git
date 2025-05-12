@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 $servername = "mysql_db";
@@ -32,20 +33,19 @@ $menu = $stmt->fetchAll(pdo::FETCH_ASSOC);
 <header>
     <div class="container-header">
         <img src="images/logo.png" alt="Logo Darko's">
-        <a href="login.php">Login</a>
-        <a href="index.php">Home</a>
     </div>
+    <div class="menu-content" id="menu-lijst">
+        <?php if (!empty($menu)): ?>
+            <ul>
+                <?php foreach ($menu as $menu): ?>
+                    <li><strong><?= htmlspecialchars($menu['naam']) ?> - </strong> <strong><?= htmlspecialchars($menu['omschrijving']) ?></strong> - €<?= number_format($menu['prijs'], 2, ',', '.') ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p>Er staan momenteel geen producten op het menu.</p>
+        <?php endif; ?>
+    </div>
+
 </header>
-<div class="menu-content" id="menu-lijst">
-    <?php if (!empty($menu)): ?>
-        <ul>
-            <?php foreach ($menu as $menu): ?>
-                <li><strong><?= htmlspecialchars($menu['naam']) ?> - </strong> <strong><?= htmlspecialchars($menu['omschrijving']) ?></strong> - €<?= number_format($menu['prijs'], 2, ',', '.') ?></li>
-            <?php endforeach; ?>
-        </ul>
-    <?php else: ?>
-        <p>Er staan momenteel geen producten op het menu.</p>
-    <?php endif; ?>
-</div>
 </body>
 </html>
