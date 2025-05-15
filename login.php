@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// DATABASECONNECTIE
 $host = "db";
 $dbname = "Menukaart";
 $username = "root";
@@ -14,34 +13,27 @@ try {
     die("Database verbinding mislukt: " . $e->getMessage());
 }
 
-// LOGIN AFHANDELING
+// login
 if (isset($_POST['login'])) {
     $gebruikersnaam = $_POST['username'];
     $wachtwoord = $_POST['password'];
 
-    // Haal de gebruiker op uit de database
     $stmt = $conn->prepare("SELECT * FROM users WHERE gebruikersnaam = :gebruikersnaam");
     $stmt->bindParam(':gebruikersnaam', $gebruikersnaam);
     $stmt->execute();
     $gebruiker = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Controleer of de gebruiker bestaat en het wachtwoord klopt
     if ($gebruiker) {
-        // Als het wachtwoord niet gehashed is, eerst updaten
         if (!password_get_info($gebruiker['wachtwoord'])['algo']) {
             $hashedPassword = password_hash($gebruiker['wachtwoord'], PASSWORD_DEFAULT);
-
-            // Update wachtwoord in de database naar gehashte versie
             $updateStmt = $conn->prepare("UPDATE users SET wachtwoord = :wachtwoord WHERE gebruikersnaam = :gebruikersnaam");
             $updateStmt->bindParam(':wachtwoord', $hashedPassword);
             $updateStmt->bindParam(':gebruikersnaam', $gebruikersnaam);
             $updateStmt->execute();
-
-            // Verifieer met de gehashte versie
             $gebruiker['wachtwoord'] = $hashedPassword;
         }
 
-        // Verifieer het wachtwoord
+        // Wachtwoord controlleren
         if (password_verify($wachtwoord, $gebruiker['wachtwoord'])) {
             $_SESSION['username'] = $gebruikersnaam;
             header("Location: admin.php");  // Redirect naar admin.php

@@ -1,5 +1,4 @@
 <?php
-// Debug mode: Show all errors
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -16,7 +15,7 @@ try {
     die("Verbinding mislukt: " . $e->getMessage());
 }
 
-// Toevoegen
+// Dingen toevoegen
 if (isset($_POST['add'])) {
     $naam = htmlspecialchars(trim($_POST['naam']));
     $omschrijving = htmlspecialchars(trim($_POST['omschrijving']));

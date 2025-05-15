@@ -6,15 +6,26 @@ $password = "rootpassword";
 
 try {
     $conn = new PDO("mysql:host=$servername;dbname=Menukaart", $username, $password);
-    // set the PDO error mode to exception
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     echo "";
 } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
 }
-$sql = "SELECT * FROM menu";
-$stmt = $conn->query($sql);
-$menu = $stmt->fetchAll(pdo::FETCH_ASSOC);
+
+// Zoeken
+$search = '';
+if (isset($_POST['search'])) {
+    $search = htmlspecialchars($_POST['query']);
+    $sql = "SELECT * FROM menu WHERE naam LIKE :search OR omschrijving LIKE :search";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindValue(':search', '%' . $search . '%');
+    $stmt->execute();
+    $menu = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $sql = "SELECT * FROM menu";
+    $stmt = $conn->query($sql);
+    $menu = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 ?>
 
@@ -23,8 +34,7 @@ $menu = $stmt->fetchAll(pdo::FETCH_ASSOC);
 <head>
     <link rel="stylesheet" href="css/style.css">
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Darko's</title>
 </head>
@@ -36,16 +46,26 @@ $menu = $stmt->fetchAll(pdo::FETCH_ASSOC);
         <a href="index.php">Home</a>
     </div>
 </header>
-<div class="menu-content" id="menu-lijst">
-    <?php if (!empty($menu)): ?>
-        <ul>
-            <?php foreach ($menu as $menu): ?>
-                <li><strong><?= htmlspecialchars($menu['naam']) ?> - </strong> <strong><?= htmlspecialchars($menu['omschrijving']) ?></strong> - €<?= number_format($menu['prijs'], 2, ',', '.') ?></li>
-            <?php endforeach; ?>
-        </ul>
-    <?php else: ?>
-        <p>Er staan momenteel geen producten op het menu.</p>
-    <?php endif; ?>
-</div>
+
+<main>
+    <!-- Zoekformulier -->
+    <form class="search-form" action="" method="post">
+        <input type="text" name="query" placeholder="Zoek..." value="<?php echo $search; ?>">
+        <button type="submit" name="search">Zoeken</button>
+    </form>
+
+    <div class="menu-content" id="menu-lijst">
+        <?php if (!empty($menu)): ?>
+            <ul>
+                <?php foreach ($menu as $item): ?>
+                    <li><strong><?= htmlspecialchars($item['naam']) ?> - </strong>
+                        <strong><?= htmlspecialchars($item['omschrijving']) ?></strong> - €<?= number_format($item['prijs'], 2, ',', '.') ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p>Geen resultaten gevonden.</p>
+        <?php endif; ?>
+    </div>
+</main>
 </body>
 </html>
